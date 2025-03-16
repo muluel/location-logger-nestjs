@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgis/postgis:16-3.5-alpine
+    container_name: postgis
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: locations
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      retries: 5
+
+  location-log:
+    build:
+      context: .
+      dockerfile: ./DockerfileLog
+    container_name: location-log
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      - AMQP_URI=amqp://guest:guest@rabbitmq:5672
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - LOG_DB_NAME=logs
+      - JWT_SECRET=SECRET
+    ports:
+      - "3001:3001"
+    command: ["node", "dist/apps/location-log/main.js"]
+
+  location-logger:
+    build:
+      context: .
+      dockerfile: ./DockerfileLocation
+    container_name: location-logger
+    depends_on:
+      location-log:
+        condition: service_started
+    environment:
+      - AMQP_URI=amqp://guest:guest@rabbitmq:5672
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=locations
+      - JWT_SECRET=SECRET
+      - LOG_SERVICE_HOST=location-log
+      - LOG_SERVICE_PORT=3001
+    ports:
+      - "3000:3000"
+    command: ["node", "dist/apps/location-logger/main.js"]
+
+volumes:
+  postgis_data:
+    name: postgis_data

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/location-logger/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "tsConfigPath": "apps/location-logger/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/location-logger",
+  "projects": {
+    "location-logger": {
+      "type": "application",
+      "root": "apps/location-logger",
+      "entryFile": "main",
+      "sourceRoot": "apps/location-logger/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/location-logger/tsconfig.app.json"
+      }
+    },
+    "location-log": {
+      "type": "application",
+      "root": "apps/location-log",
+      "entryFile": "main",
+      "sourceRoot": "apps/location-log/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/location-log/tsconfig.app.json"
+      }
+    }
+  }
+}

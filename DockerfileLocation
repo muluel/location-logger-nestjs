@@ -1,0 +1,15 @@
+FROM node:23
+
+WORKDIR /app
+
+COPY ./package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build location-logger
+
+CMD [ "node", "dist/apps/location-log/main.js" ]
+
+EXPOSE 3000
