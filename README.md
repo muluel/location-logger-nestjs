@@ -16,13 +16,16 @@ $ npm install
 
 ```bash
 # development
-$ npm run start
+$ npm run start location-logger
+$ npm run start location-log
 
 # watch mode
-$ npm run start:dev
+$ npm run start:dev location-logger
+$ npm run start:dev location-log
 
 # production mode
-$ npm run start:prod
+$ npm run start:prod:location-logger
+$ npm run start:prod:location-log
 ```
 
 ## Run tests
